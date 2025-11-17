@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TwetaScan Explorer</title>
+  <style>
+    :root {
+      --gold: #d4af37;
+      --dark: #111;
+      --light: #f9f9f9;
+      --text-dark: #222;
+      --text-light: #555;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--light);
+      color: var(--text-dark);
+    }
+
+    /* NAVBAR */
+    header {
+      width: 100%;
+      background: var(--dark);
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      position: relative;
+    }
+
+    .footer {
+      width: 100%;
+      background: var(--dark);
+      color: #fff;
+      display: flex;
+      justify-content:center;
+      align-items: center;
+      padding: 15px 30px;
+      position: relative;
+      text-align: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--gold);
+    }
+
+    nav {
+      display: flex;
+      gap: 20px;
+    }
+
+    nav .dropdown {
+      position: relative;
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    nav .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 30px;
+      left: 0;
+      background: #fff;
+      color: #000;
+      min-width: 150px;
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+
+    nav .dropdown-content a {
+      display: block;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      color: #000;
+    }
+
+    nav .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    /* MOBILE MENU */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      gap: 5px;
+    }
+
+    .hamburger div {
+      width: 25px;
+      height: 3px;
+      background: var(--gold);
+    }
+
+    #mobileMenu {
+      display: none;
+      background: #222;
+      padding: 20px;
+    }
+
+    #mobileMenu a {
+      display: block;
+      color: #fff;
+      padding: 10px 0;
+      text-decoration: none;
+    }
+
+    /* SEARCH AREA */
+    .search-section {
+      background: var(--dark);
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    .search-title {
+      font-size: 1.6rem;
+      margin-bottom: 15px;
+      color: var(--gold);
+    }
+
+    .search-box {
+      display: flex;
+      background: #fff;
+      border-radius: 5px;
+      overflow: hidden;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .search-box input {
+      flex: 1;
+      border: none;
+      padding: 12px;
+      font-size: 1rem;
+    }
+
+    .search-box button {
+      background: var(--gold);
+      border: none;
+      padding: 12px 20px;
+      cursor: pointer;
+      color: #000;
+      font-weight: bold;
+    }
+
+    /* LOADING SHIMMER */
+    .shimmer {
+      background: linear-gradient(90deg, #ddd 25%, #eee 50%, #ddd 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    /* CHART */
+    #chartContainer {
+      width: 90%;
+      margin: 30px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    canvas { width: 100%; height: 300px; }
+
+    /* RESPONSIVE */
+    @media(max-width: 700px) {
+      nav { display: none; }
+      .hamburger { display: flex; }
+    }
+
+
+
+    /* STATS CARDS */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      padding: 20px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    /*FOR blocks and transactions*/
+    .stat-card-grid {
+      background:whitesmoke;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .stat-title {
+      font-size: 0.9rem;
+      color: var(--text-light);
+    }
+
+    .stat-value {
+      font-size: 1.3rem;
+      margin-top: 5px;
+      font-weight: bold;
+      color: var(--gold);
+    }
+
+    /* BLOCK & TRANSACTION LISTS */
+    .section-title {
+      font-size: 1.2rem;
+      margin: 20px;
+      font-weight: bold;
+      color: var(--text-dark);
+    }
+
+    .list-box {
+      background: #fff;
+      padding: 20px;
+      margin: 20px;
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+    }
+
+    .list-item {
+      padding: 15px 10px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+    }
+
+
+    /* CHART */
+    #chartContainer {
+      width: 90%;
+      margin: 30px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    canvas { width: 100%; height: 300px; }
+
+
+    .containergrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .boxgrid {
+        background: #eee;
+        padding: 20px;
+        border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">T<span style="color:white">weta</span>Scan</div>
+
+  <div class="hamburger" onclick="toggleMenu()">
+    <div></div><div></div><div></div>
+  </div>
+
+  <nav>
+    <div class="dropdown">
+      <a>Blockchain ▾</a>
+      <div class="dropdown-content">
+        <a href="#">Blocks</a>
+        <a href="#">Transactions</a>
+        <a href="#">Contracts</a>
+      </div>
+    </div>
+
+    <div class="dropdown">
+      <a>Validators ▾</a>
+      <div class="dropdown-content">
+        <a href="#">Top Validators</a>
+        <a href="#">Stake Info</a>
+      </div>
+    </div>
+
+    <a href="#">Tokens</a>
+    <a href="#">Resources</a>
+  </nav>
+</header>
+
+<div id="mobileMenu">
+  <a href="#">Blockchain</a>
+  <a href="#">Validators</a>
+  <a href="#">Tokens</a>
+  <a href="#">Resources</a>
+</div>
+
+<section class="search-section">
+  <div class="search-title">Tweta Smart Chain Explorer</div>
+  <div class="search-box">
+    <input type="text" id="searchbox" placeholder="Search by Address / Txn Hash / Block / Token" />
+    <button id="searcher">Search</button>
+  </div>
+</section>
+
+<section class="stats-container">
+  <div class="stat-card">
+    <div class="stat-title">TWC Price</div>
+    <div class="stat-value">$325.12</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-title">Transactions</div>
+    <div class="stat-value">12,485,992</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-title">Avg Gas Price</div>
+    <div class="stat-value">0.98 Gwei</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-title">Latest Block</div>
+    <div class="stat-value">6849122</div>
+  </div>
+</section>
+
+
+<div id="chartContainer">
+  <h3 style="color:var(--gold);">Transaction History (Simulated)</h3>
+  <canvas id="txnChart"></canvas>
+</div>
+
+
+<!--<div class="section-title">Latest Blocks</div>
+<div class="list-box" id="blockList"></div>
+
+<div class="section-title">Latest Transactions</div>
+<div class="list-box" id="txnList"></div>-->
+
+<!--<div class="containergrid">
+  <div class="boxgrid">
+    <div class="section-title">Latest Blocks</div>
+    <div class="list-box" id="blockList"></div>
+  </div>
+  
+  <div class="boxgrid">
+    <div class="section-title">Latest Transactions</div>
+    <div class="list-box" id="txnList"></div>
+  </div>
+</div>-->
+
+
+<section class="stats-container">
+  <div class="stat-card-grid">
+    <div class="section-title">Latest Blocks</div>
+    <div class="list-box" id="blockList"></div>
+  </div>
+  <div class="stat-card-grid">
+    <div class="section-title">Latest Transactions</div>
+    <div class="list-box" id="txnList"></div>
+  </div>
+</section>
+
+
+
+
+
+<div class="footer">
+  <div style="text-align: center; font-size: 16px; line-height: 2.0;">
+    <span style="color:#d4af37;"> Twetachain</span> - Twetacoin | TwetaScan <br />
+    Tweta Card | Tweta Wallet | Tweta Exchange
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function toggleMenu() {
+  let menu = document.getElementById('mobileMenu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+const ctx = document.getElementById('txnChart');
+let chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets: [{
+      label: 'Transactions',
+      data: Array.from({length:7}, () => Math.floor(Math.random()*20000)),
+      borderColor: '#d4af37',
+      borderWidth: 2,
+      tension: 0.4
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } }
+  }
+});
+
+setInterval(() => {
+  chart.data.datasets[0].data = Array.from({length:7}, () => Math.floor(Math.random()*20000));
+  chart.update();
+}, 4000);
+</script>
+
+
+<script>
+  // Simulate auto-loading blocks and transactions
+  function generateBlock() {
+    return {
+      id: Math.floor(Math.random() * 9999999),
+      age: Math.floor(Math.random() * 50) + " secs ago",
+      txns: Math.floor(Math.random() * 200)
+    };
+  }
+
+  function generateTxn() {
+    return {
+      from: "0x" + Math.random().toString(16).substring(2, 10),
+      to: "0x" + Math.random().toString(16).substring(2, 10),
+      amount: (Math.random() * 1).toFixed(3) + " TWC"
+    };
+  }
+
+  function updateLists() {
+    const blockBox = document.getElementById("blockList");
+    const txnBox = document.getElementById("txnList");
+
+    blockBox.innerHTML = "";
+    txnBox.innerHTML = "";
+
+    for (let i = 0; i < 6; i++) {
+      let b = generateBlock();
+      blockBox.innerHTML += `<div class='list-item'><span>Block #${b.id} — ${b.age}</span><span>${b.txns} txns</span></div>`;
+
+      let t = generateTxn();
+      txnBox.innerHTML += `<div class='list-item'><span>${t.from} → ${t.to}</span><span>${t.amount}</span></div>`;
+    }
+  }
+
+  updateLists();
+  setInterval(updateLists, 4000);
+
+
+
+
+  document.getElementById("searcher").addEventListener('click', ()=>{
+        let qq = document.getElementById("searchbox").value;
+        window.location=`details.html?hash=${qq}`;
+    });
+</script>
+
+</body>
+</html>

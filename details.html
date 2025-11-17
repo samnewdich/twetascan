@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TwetaScan Explorer</title>
+  <style>
+    @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+    :root {
+      --gold: #d4af37;
+      --dark: #111;
+      --light: #f9f9f9;
+      --text-dark: #222;
+      --text-light: #555;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--light);
+      color: var(--text-dark);
+    }
+
+    /* NAVBAR */
+    header {
+      width: 100%;
+      background: var(--dark);
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      position: relative;
+    }
+
+    .footer {
+      width: 100%;
+      background: var(--dark);
+      color: #fff;
+      display: flex;
+      justify-content:center;
+      align-items: center;
+      padding: 15px 30px;
+      position: relative;
+      text-align: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--gold);
+    }
+
+    nav {
+      display: flex;
+      gap: 20px;
+    }
+
+    nav .dropdown {
+      position: relative;
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    nav .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 30px;
+      left: 0;
+      background: #fff;
+      color: #000;
+      min-width: 150px;
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+
+    nav .dropdown-content a {
+      display: block;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      color: #000;
+    }
+
+    nav .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    /* MOBILE MENU */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      gap: 5px;
+    }
+
+    .hamburger div {
+      width: 25px;
+      height: 3px;
+      background: var(--gold);
+    }
+
+    #mobileMenu {
+      display: none;
+      background: #222;
+      padding: 20px;
+    }
+
+    #mobileMenu a {
+      display: block;
+      color: #fff;
+      padding: 10px 0;
+      text-decoration: none;
+    }
+
+    /* SEARCH AREA */
+    .search-section {
+      background: var(--dark);
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    .search-title {
+      font-size: 1.6rem;
+      margin-bottom: 15px;
+      color: var(--gold);
+    }
+
+    .search-box {
+      display: flex;
+      background: #fff;
+      border-radius: 5px;
+      overflow: hidden;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .search-box input {
+      flex: 1;
+      border: none;
+      padding: 12px;
+      font-size: 1rem;
+    }
+
+    .search-box button {
+      background: var(--gold);
+      border: none;
+      padding: 12px 20px;
+      cursor: pointer;
+      color: #000;
+      font-weight: bold;
+    }
+
+    /* LOADING SHIMMER */
+    .shimmer {
+      background: linear-gradient(90deg, #ddd 25%, #eee 50%, #ddd 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    /* CHART */
+    #chartContainer {
+      width: 90%;
+      margin: 30px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    canvas { width: 100%; height: 300px; }
+
+    /* RESPONSIVE */
+    @media(max-width: 700px) {
+      nav { display: none; }
+      .hamburger { display: flex; }
+    }
+
+
+
+    /* STATS CARDS */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      padding: 20px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    /*FOR blocks and transactions*/
+    .stat-card-grid {
+      background:whitesmoke;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .stat-title-grid {
+      font-size: 16px;
+      color: var(--text-light);
+    }
+
+    .stat-title {
+      font-size: 0.9rem;
+      color: var(--text-light);
+    }
+
+    .stat-value {
+      font-size: 1.3rem;
+      margin-top: 5px;
+      font-weight: bold;
+      color: var(--gold);
+    }
+
+    /* BLOCK & TRANSACTION LISTS */
+    .section-title {
+      font-size: 1.2rem;
+      margin: 20px;
+      font-weight: bold;
+      color: var(--text-dark);
+    }
+
+    .list-box {
+      background: #fff;
+      padding: 20px;
+      margin: 20px;
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+    }
+
+    .list-item {
+      padding: 15px 10px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+    }
+
+
+    /* CHART */
+    #chartContainer {
+      width: 90%;
+      margin: 30px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    canvas { width: 100%; height: 300px; }
+
+
+    .containergrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .boxgrid {
+        background: #eee;
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    #detailvalue table{
+        width: 90%;
+        margin-left: 5%;
+    }
+
+    #detailvalue table tr{
+        width: 100%;
+        height: 50px;
+    }
+
+    #detailvalue table tr td:first-child{
+        width: 30%;
+        border-bottom-width: thin;
+        border-bottom-style: solid;
+        border-color: #d4af37;
+    }
+
+    #detailvalue table tr td:last-child{
+        width: 68%;
+        font-size: 18px;
+        font-weight: bold;
+        border-bottom-width: thin;
+        border-bottom-style: solid;
+        border-color: #d4af37;
+    }
+    
+    .statusSuccess{
+        width: 100px;
+        height: 40px;
+        background-color:darkturquoise;
+        color: white;
+        font-weight: lighter;
+        border-width: thin;
+        border-style: solid;
+        border-color: darkcyan;
+        font-size:14px;
+        padding: 5px;
+        border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">T<span style="color:white">weta</span>Scan</div>
+
+  <div class="hamburger" onclick="toggleMenu()">
+    <div></div><div></div><div></div>
+  </div>
+
+  <nav>
+    <div class="dropdown">
+      <a>Blockchain ▾</a>
+      <div class="dropdown-content">
+        <a href="#">Blocks</a>
+        <a href="#">Transactions</a>
+        <a href="#">Contracts</a>
+      </div>
+    </div>
+
+    <div class="dropdown">
+      <a>Validators ▾</a>
+      <div class="dropdown-content">
+        <a href="#">Top Validators</a>
+        <a href="#">Stake Info</a>
+      </div>
+    </div>
+
+    <a href="#">Tokens</a>
+    <a href="#">Resources</a>
+  </nav>
+</header>
+
+<div id="mobileMenu">
+  <a href="#">Blockchain</a>
+  <a href="#">Validators</a>
+  <a href="#">Tokens</a>
+  <a href="#">Resources</a>
+</div>
+
+<section class="search-section">
+  <div class="search-title">Tweta Smart Chain Explorer</div>
+  <div class="search-box">
+    <input type="text" id="searchbox" placeholder="Search by Address / Txn Hash / Block / Token" />
+    <button id="searcher">Search</button>
+  </div>
+</section>
+
+<section class="stats-container">
+  <div class="stat-card">
+    <div class="stat-title">TWC Price</div>
+    <div class="stat-value">$325.12</div>
+  </div>
+</section>
+
+
+
+<section class="stats-container">
+  <div class="stat-card-grid">
+    <div class="section-title">Transaction Details</div>
+  </div>
+</section>
+
+
+<div id="detailvalue"></div>
+
+
+
+
+
+
+
+<div class="footer">
+  <div style="text-align: center; font-size: 16px; line-height: 2.0;">
+    <span style="color:#d4af37;"> Twetachain</span> - Twetacoin | TwetaScan <br />
+    Tweta Card | Tweta Wallet | Tweta Exchange
+  </div>
+</div>
+
+
+<script>
+    document.getElementById("searcher").addEventListener('click', ()=>{
+        let qq = document.getElementById("searchbox").value;
+        window.location=`details.html?hash=${qq}`;
+    });
+
+    function getParam() {
+        //return new URLSearchParams(window.location.search).get(name);
+        let name = new URLSearchParams(window.location.search).get('hash');
+
+        if(name !=='' && name !==undefined && name !==null){
+
+            let outputdetails = `
+                <table style="line-height:2.0; font-size:16px;">
+                    <tr>
+                        <td><i class="bi bi-hash"></i> Transaction Hash:</td>
+                        <td>  ${'tweta'+name}</td>
+                    </tr>
+
+                    <tr>
+                        <td><i class="bi bi-device-ssd"></i> Status:</td>
+                        <td>  ${statusBadge('success')}</td>
+                    </tr>
+
+                    <tr>
+                        <td><i class="bi bi-cpu"></i> Block:</td>
+                        <td>  68491441</td>
+                    </tr>
+
+                    <tr>
+                        <td><i class="bi bi-alarm"></i> Timestamp:</td>
+                        <td style="font-size:14px; font-weight:lighter;">  ${new Date()}</td>
+                    </tr>
+
+                    <tr>
+                        <td><i class="bi bi-arrow-right-short"></i> From:</td>
+                        <td style="font-size:14px; font-weight:lighter;">  tweta9f1b7FAE54BE07F4FEE34Eb1aaCb39A1F7B6FC92</td>
+                    </tr>
+
+                    <tr>
+                        <td><i class="bi bi-arrow-left-short"></i> To:</td>
+                        <td style="font-size:14px; font-weight:lighter;">  tweta0000000000000000000000000000000000001000</td>
+                    </tr>
+
+                    <tr>
+                        <td><i class="bi bi-cash-stack"></i> Value:</td>
+                        <td>  258 TWETA</td>
+                    </tr>
+                </table>
+            `;
+            document.getElementById("detailvalue").innerHTML=`${outputdetails}`;
+        }
+        else{
+            document.getElementById("detailvalue").innerHTML=`<div style="text-align:center; font-size:18px; padding:20px;">No data found</div>`;
+        }
+    }
+
+
+    function statusBadge(st){
+        if(st ==='success'){
+            return `<span class="statusSuccess"><i class="bi bi-check2-circle"></i> ${st}</span>`;
+        }
+    }
+
+    setTimeout(getParam, 1000);
+
+    
+</script>
+
+</body>
+</html>
